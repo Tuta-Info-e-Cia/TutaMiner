@@ -1,0 +1,2 @@
+# TutaMiner
+TutaMinerSeuMelhorMineiradorCripto!
