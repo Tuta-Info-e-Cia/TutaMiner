@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tuta Miner - Seu Melhor Mineirador Cripto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .logo-upload {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        .logo-upload input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .mining-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-gray-700 pb-6">
+            <div class="flex items-center mb-4 md:mb-0">
+                <img id="app-logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAxMk0xMCAxOEwxMiAyMEwxNCAxOE0xNCA2TDEyIDRMMTAgNk0xNSAxMkwyMCA3TTQgMTJMOSA3TTkgMTdMNSAyMU0xOSA3TDE1IDNNMTUgMTdMMTkgMjEiLz48L3N2Zz4=" alt="Tuta Miner Logo" class="h-12 w-12 mr-3">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold">Tuta Miner</h1>
+                    <p class="text-gray-400">Seu Melhor Mineirador Cripto</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-sm text-gray-400">By Tuta Info Tecnologies 2025</p>
+                <div class="logo-upload mt-2">
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
+                        <i class="fas fa-image mr-1"></i> Alterar Logo
+                    </button>
+                    <input type="file" id="logo-upload" accept="image/*">
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Wallet Configuration (shown only on first access) -->
+            <div id="wallet-config" class="bg-gray-800 rounded-lg p-6 mb-8 shadow-lg hidden">
+                <h2 class="text-xl font-bold mb-4">Configuração Inicial</h2>
+                <p class="text-gray-300 mb-4">Por favor, configure sua carteira Binance para receber seus ganhos de mineração.</p>
+                
+                <div class="mb-4">
+                    <label for="wallet-address" class="block text-gray-300 mb-2">Endereço da Carteira Binance</label>
+                    <input type="text" id="wallet-address" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Digite seu endereço Binance">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="auto-send" class="flex items-center cursor-pointer">
+                        <div class="relative">
+                            <input type="checkbox" id="auto-send" class="sr-only" checked>
+                            <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                        </div>
+                        <div class="ml-3 text-gray-300">
+                            Enviar automaticamente para Binance
+                        </div>
+                    </label>
+                </div>
+                
+                <button id="save-wallet" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium">
+                    <i class="fas fa-save mr-2"></i> Salvar Configuração
+                </button>
+            </div>
+
+            <!-- Mining Dashboard -->
+            <div id="mining-dashboard" class="hidden">
+                <!-- Tabs -->
+                <div class="flex border-b border-gray-700 mb-6">
+                    <button class="tab-btn active px-6 py-2 font-medium border-b-2 border-blue-500" data-tab="dashboard">Dashboard</button>
+                    <button class="tab-btn px-6 py-2 font-medium text-gray-400 hover:text-white" data-tab="wallet">Carteira</button>
+                    <button class="tab-btn px-6 py-2 font-medium text-gray-400 hover:text-white" data-tab="settings">Configurações</button>
+                    <button class="tab-btn px-6 py-2 font-medium text-gray-400 hover:text-white" data-tab="about">Sobre</button>
+                </div>
+
+                <!-- Dashboard Tab -->
+                <div id="dashboard" class="tab-content active">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <!-- Mining Status Card -->
+                        <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold">Status de Mineração</h3>
+                                <div id="mining-status" class="bg-red-600 text-white text-xs px-2 py-1 rounded-full">OFF</div>
+                            </div>
+                            <div class="flex justify-center mb-4">
+                                <div class="relative">
+                                    <img id="current-crypto-logo" src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" alt="BTC" class="h-16 w-16 mining-animation">
+                                </div>
+                            </div>
+                            <div class="text-center mb-4">
+                                <select id="crypto-select" class="bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="BTC">Bitcoin (BTC)</option>
+                                    <option value="ETH">Ethereum (ETH)</option>
+                                    <option value="LTC">Litecoin (LTC)</option>
+                                    <option value="XMR">Monero (XMR)</option>
+                                    <option value="DOGE">Dogecoin (DOGE)</option>
+                                </select>
+                            </div>
+                            <button id="toggle-mining" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold">
+                                <i class="fas fa-power-off mr-2"></i> Iniciar Mineração
+                            </button>
+                        </div>
+
+                        <!-- Mining Stats Card -->
+                        <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                            <h3 class="text-lg font-semibold mb-4">Estatísticas</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-gray-300">Hashrate</span>
+                                    </div>
+                                    <div class="bg-gray-700 rounded-full h-2.5">
+                                        <div id="hashrate-bar" class="bg-blue-600 h-2.5 rounded-full progress-bar" style="width: 0%"></div>
+                                    </div>
+                                    <div class="text-right mt-1">
+                                        <span id="hashrate-value" class="text-sm text-gray-300">0 H/s</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-gray-300">Temperatura</span>
+                                    </div>
+                                    <div class="bg-gray-700 rounded-full h-2.5">
+                                        <div id="temp-bar" class="bg-yellow-500 h-2.5 rounded-full progress-bar" style="width: 30%"></div>
+                                    </div>
+                                    <div class="text-right mt-1">
+                                        <span id="temp-value" class="text-sm text-gray-300">30°C</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-gray-300">Uso de Energia</span>
+                                    </div>
+                                    <div class="bg-gray-700 rounded-full h-2.5">
+                                        <div id="power-bar" class="bg-green-500 h-2.5 rounded-full progress-bar" style="width: 15%"></div>
+                                    </div>
+                                    <div class="text-right mt-1">
+                                        <span id="power-value" class="text-sm text-gray-300">15 W</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Earnings Card -->
+                        <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                            <h3 class="text-lg font-semibold mb-4">Ganhos</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-300">Hoje</span>
+                                    <span id="today-earnings" class="font-medium">0.00000000 BTC</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-300">Esta Semana</span>
+                                    <span id="week-earnings" class="font-medium">0.00000000 BTC</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-300">Este Mês</span>
+                                    <span id="month-earnings" class="font-medium">0.00000000 BTC</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-300">Total</span>
+                                    <span id="total-earnings" class="font-medium">0.00000000 BTC</span>
+                                </div>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-gray-700">
+                                <button id="send-to-binance" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg">
+                                    <i class="fas fa-paper-plane mr-2"></i> Enviar para Binance
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mining Log -->
+                    <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                        <h3 class="text-lg font-semibold mb-4">Log de Mineração</h3>
+                        <div id="mining-log" class="bg-gray-900 rounded-lg p-4 h-48 overflow-y-auto font-mono text-sm">
+                            <div class="text-gray-400">Sistema iniciado. Pronto para minerar.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wallet Tab -->
+                <div id="wallet" class="tab-content">
+                    <div class="bg-gray-800 rounded-lg p-6 shadow-lg mb-6">
+                        <h3 class="text-lg font-semibold mb-4">Sua Carteira Binance</h3>
+                        <div class="mb-4">
+                            <label class="block text-gray-300 mb-2">Endereço da Carteira</label>
+                            <div class="bg-gray-700 p-3 rounded-lg break-all" id="saved-wallet-address">Nenhum endereço configurado</div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-300 mb-2">Status de Envio Automático</label>
+                            <div id="auto-send-status" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-700 text-gray-300">
+                                <i class="fas fa-times-circle mr-2"></i> Desativado
+                            </div>
+                        </div>
+                        <button id="edit-wallet" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                            <i class="fas fa-edit mr-2"></i> Editar Configuração
+                        </button>
+                    </div>
+
+                    <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                        <h3 class="text-lg font-semibold mb-4">Histórico de Transações</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-700">
+                                <thead>
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Data</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Criptomoeda</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Quantia</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transaction-history" class="bg-gray-900 divide-y divide-gray-700">
+                                    <tr>
+                                        <td colspan="4" class="px-6 py-4 text-center text-gray-400">Nenhuma transação encontrada</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div id="settings" class="tab-content">
+                    <div class="bg-gray-800 rounded-lg p-6 shadow-lg mb-6">
+                        <h3 class="text-lg font-semibold mb-4">Configurações do Minerador</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <div class="mb-4">
+                                    <label for="mining-intensity" class="block text-gray-300 mb-2">Intensidade de Mineração</label>
+                                    <select id="mining-intensity" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="low">Baixa (Menos recursos)</option>
+                                        <option value="medium" selected>Média (Balanço)</option>
+                                        <option value="high">Alta (Máximo desempenho)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="auto-start" class="flex items-center cursor-pointer">
+                                        <div class="relative">
+                                            <input type="checkbox" id="auto-start" class="sr-only">
+                                            <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
+                                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                                        </div>
+                                        <div class="ml-3 text-gray-300">
+                                            Iniciar mineração automaticamente
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="mb-4">
+                                    <label for="mining-pool" class="block text-gray-300 mb-2">Pool de Mineração</label>
+                                    <select id="mining-pool" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="tuta-pool-1">Tuta Pool 1 (Brasil)</option>
+                                        <option value="tuta-pool-2" selected>Tuta Pool 2 (Global)</option>
+                                        <option value="tuta-pool-3">Tuta Pool 3 (EUA)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="notifications" class="flex items-center cursor-pointer">
+                                        <div class="relative">
+                                            <input type="checkbox" id="notifications" class="sr-only" checked>
+                                            <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
+                                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                                        </div>
+                                        <div class="ml-3 text-gray-300">
+                                            Notificações
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 pt-4 border-t border-gray-700">
+                            <button id="save-settings" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium">
+                                <i class="fas fa-save mr-2"></i> Salvar Configurações
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                        <h3 class="text-lg font-semibold mb-4">Configurações de Hardware</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <div class="mb-4">
+                                    <label for="gpu-usage" class="block text-gray-300 mb-2">Uso da GPU</label>
+                                    <input type="range" id="gpu-usage" min="0" max="100" value="80" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                    <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                        <span>0%</span>
+                                        <span id="gpu-usage-value">80%</span>
+                                        <span>100%</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="cpu-usage" class="block text-gray-300 mb-2">Uso da CPU</label>
+                                    <input type="range" id="cpu-usage" min="0" max="100" value="50" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                    <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                        <span>0%</span>
+                                        <span id="cpu-usage-value">50%</span>
+                                        <span>100%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="mb-4">
+                                    <label for="temp-limit" class="block text-gray-300 mb-2">Limite de Temperatura (°C)</label>
+                                    <input type="number" id="temp-limit" min="30" max="100" value="75" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="power-limit" class="block text-gray-300 mb-2">Limite de Energia (W)</label>
+                                    <input type="number" id="power-limit" min="10" max="500" value="200" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- About Tab -->
+                <div id="about" class="tab-content">
+                    <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                        <div class="flex flex-col md:flex-row items-center mb-6">
+                            <img id="about-logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik0xMiAxMk0xMCAxOEwxMiAyMEwxNCAxOE0xNCA2TDEyIDRMMTAgNk0xNSAxMkwyMCA3TTQgMTJMOSA3TTkgMTdMNSAyMU0xOSA3TDE1IDNNMTUgMTdMMTkgMjEiLz48L3N2Zz4=" alt="Tuta Miner Logo" class="h-24 w-24 mr-0 md:mr-6 mb-4 md:mb-0">
+                            <div>
+                                <h2 class="text-2xl font-bold">Tuta Miner</h2>
+                                <p class="text-gray-300 mb-2">Versão 2.5.0</p>
+                                <p class="text-gray-400">Seu Melhor Mineirador Cripto</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-2">Sobre</h3>
+                            <p class="text-gray-300 mb-4">
+                                Tuta Miner é um software avançado de mineração de criptomoedas que permite minerar diversas criptomoedas, incluindo Bitcoin, Ethereum, Litecoin e outras, com facilidade e eficiência.
+                            </p>
+                            <p class="text-gray-300">
+                                Nosso sistema envia automaticamente todos os ganhos para sua carteira Binance, sem quantia mínima necessária.
+                            </p>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-2">Recursos</h3>
+                            <ul class="list-disc list-inside text-gray-300 space-y-2">
+                                <li>Mineração de múltiplas criptomoedas (BTC, ETH, LTC, XMR, DOGE)</li>
+                                <li>Envio automático para Binance (sem mínimo)</li>
+                                <li>Configuração personalizada de hardware</li>
+                                <li>Monitoramento em tempo real</li>
+                                <li>Compatível com Windows, Linux, Mac, Android e iPhone</li>
+                                <li>Interface intuitiva e fácil de usar</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="pt-4 border-t border-gray-700">
+                            <p class="text-center text-gray-400">By Tuta Info Tecnologies 2025</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Check if wallet is configured
+        document.addEventListener('DOMContentLoaded', function() {
+            const walletAddress = localStorage.getItem('tutaMinerWalletAddress');
+            const autoSend = localStorage.getItem('tutaMinerAutoSend') === 'true';
+            
+            if (!walletAddress) {
+                document.getElementById('wallet-config').classList.remove('hidden');
+            } else {
+                document.getElementById('mining-dashboard').classList.remove('hidden');
+                document.getElementById('saved-wallet-address').textContent = walletAddress;
+                updateAutoSendStatus(autoSend);
+            }
+            
+            // Initialize UI elements
+            initUI();
+        });
+
+        // Save wallet configuration
+        document.getElementById('save-wallet').addEventListener('click', function() {
+            const walletAddress = document.getElementById('wallet-address').value.trim();
+            const autoSend = document.getElementById('auto-send').checked;
+            
+            if (!walletAddress) {
+                alert('Por favor, insira um endereço de carteira válido.');
+                return;
+            }
+            
+            localStorage.setItem('tutaMinerWalletAddress', walletAddress);
+            localStorage.setItem('tutaMinerAutoSend', autoSend);
+            
+            document.getElementById('wallet-config').classList.add('hidden');
+            document.getElementById('mining-dashboard').classList.remove('hidden');
+            document.getElementById('saved-wallet-address').textContent = walletAddress;
+            updateAutoSendStatus(autoSend);
+            
+            addLog('Configuração da carteira salva com sucesso.');
+        });
+
+        // Edit wallet configuration
+        document.getElementById('edit-wallet').addEventListener('click', function() {
+            document.getElementById('wallet-address').value = localStorage.getItem('tutaMinerWalletAddress') || '';
+            document.getElementById('auto-send').checked = localStorage.getItem('tutaMinerAutoSend') === 'true';
+            
+            document.getElementById('wallet-config').classList.remove('hidden');
+        });
+
+        // Tabs functionality
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons and contents
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('active', 'border-blue-500', 'text-white');
+                    btn.classList.add('text-gray-400');
+                });
+                
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Add active class to clicked button and corresponding content
+                this.classList.add('active', 'border-blue-500', 'text-white');
+                this.classList.remove('text-gray-400');
+                
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Mining functionality
+        let isMining = false;
+        let miningInterval;
+        let currentCrypto = 'BTC';
+        const cryptoLogos = {
+            'BTC': 'https://cryptologos.cc/logos/bitcoin-btc-logo.png',
+            'ETH': 'https://cryptologos.cc/logos/ethereum-eth-logo.png',
+            'LTC': 'https://cryptologos.cc/logos/litecoin-ltc-logo.png',
+            'XMR': 'https://cryptologos.cc/logos/monero-xmr-logo.png',
+            'DOGE': 'https://cryptologos.cc/logos/dogecoin-doge-logo.png'
+        };
+        
+        document.getElementById('toggle-mining').addEventListener('click', function() {
+            isMining = !isMining;
+            
+            if (isMining) {
+                startMining();
+            } else {
+                stopMining();
+            }
+        });
+        
+        document.getElementById('crypto-select').addEventListener('change', function() {
+            currentCrypto = this.value;
+            document.getElementById('current-crypto-logo').src = cryptoLogos[currentCrypto];
+            
+            if (isMining) {
+                stopMining();
+                startMining();
+            }
+        });
+        
+        function startMining() {
+            document.getElementById('toggle-mining').innerHTML = '<i class="fas fa-power-off mr-2"></i> Parar Mineração';
+            document.getElementById('toggle-mining').classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            document.getElementById('toggle-mining').classList.add('bg-red-600', 'hover:bg-red-700');
+            document.getElementById('mining-status').textContent = 'ON';
+            document.getElementById('mining-status').classList.remove('bg-red-600');
+            document.getElementById('mining-status').classList.add('bg-green-600');
+            
+            // Start mining animation
+            document.getElementById('current-crypto-logo').classList.add('mining-animation');
+            
+            // Simulate mining
+            miningInterval = setInterval(updateMiningStats, 1000);
+            
+            addLog(`Mineração de ${currentCrypto} iniciada.`);
+        }
+        
+        function stopMining() {
+            document.getElementById('toggle-mining').innerHTML = '<i class="fas fa-power-off mr-2"></i> Iniciar Mineração';
+            document.getElementById('toggle-mining').classList.remove('bg-red-600', 'hover:bg-red-700');
+            document.getElementById('toggle-mining').classList.add('bg-blue-600', 'hover:bg-blue-700');
+            document.getElementById('mining-status').textContent = 'OFF';
+            document.getElementById('mining-status').classList.remove('bg-green-600');
+            document.getElementById('mining-status').classList.add('bg-red-600');
+            
+            // Stop mining animation
+            document.getElementById('current-crypto-logo').classList.remove('mining-animation');
+            
+            // Clear mining interval
+            clearInterval(miningInterval);
+            
+            addLog(`Mineração de ${currentCrypto} parada.`);
+        }
+        
+        function updateMiningStats() {
+            // Randomize stats for demo purposes
+            const hashrate = Math.floor(Math.random() * 100) + 50;
+            const temp = Math.floor(Math.random() * 20) + 50;
+            const power = Math.floor(Math.random() * 100) + 50;
+            
+            // Update progress bars
+            document.getElementById('hashrate-bar').style.width = `${Math.min(hashrate, 100)}%`;
+            document.getElementById('temp-bar').style.width = `${Math.min(temp, 100)}%`;
+            document.getElementById('power-bar').style.width = `${Math.min(power, 100)}%`;
+            
+            // Update values
+            document.getElementById('hashrate-value').textContent = `${hashrate} KH/s`;
+            document.getElementById('temp-value').textContent = `${temp}°C`;
+            document.getElementById('power-value').textContent = `${power} W`;
+            
+            // Update earnings (very small amounts)
+            const earnings = (Math.random() * 0.000001).toFixed(8);
+            updateEarnings(currentCrypto, earnings);
+            
+            // Occasionally add log entries
+            if (Math.random() > 0.7) {
+                const shares = Math.floor(Math.random() * 5) + 1;
+                addLog(`Encontrado ${shares} ${shares > 1 ? 'shares' : 'share'} de ${currentCrypto}.`);
+            }
+            
+            // Auto send to Binance if enabled
+            const autoSend = localStorage.getItem('tutaMinerAutoSend') === 'true';
+            if (autoSend && Math.random() > 0.9) {
+                sendToBinance();
+            }
+        }
+        
+        function updateEarnings(crypto, amount) {
+            // In a real app, you would save these values to localStorage or a database
+            const todayEarnings = document.getElementById('today-earnings');
+            const weekEarnings = document.getElementById('week-earnings');
+            const monthEarnings = document.getElementById('month-earnings');
+            const totalEarnings = document.getElementById('total-earnings');
+            
+            // For demo purposes, we'll just increment the values slightly
+            const currentToday = parseFloat(todayEarnings.textContent.split(' ')[0]) || 0;
+            todayEarnings.textContent = (currentToday + parseFloat(amount)).toFixed(8) + ' ' + crypto;
+            
+            const currentWeek = parseFloat(weekEarnings.textContent.split(' ')[0]) || 0;
+            weekEarnings.textContent = (currentWeek + parseFloat(amount)/7).toFixed(8) + ' ' + crypto;
+            
+            const currentMonth = parseFloat(monthEarnings.textContent.split(' ')[0]) || 0;
+            monthEarnings.textContent = (currentMonth + parseFloat(amount)/30).toFixed(8) + ' ' + crypto;
+            
+            const currentTotal = parseFloat(totalEarnings.textContent.split(' ')[0]) || 0;
+            totalEarnings.textContent = (currentTotal + parseFloat(amount)).toFixed(8) + ' ' + crypto;
+        }
+        
+        function sendToBinance() {
+            const walletAddress = localStorage.getItem('tutaMinerWalletAddress');
+            if (!walletAddress) {
+                addLog('Erro: Nenhum endereço de carteira Binance configurado.');
+                return;
+            }
+            
+            const todayEarnings = document.getElementById('today-earnings');
+            const amount = parseFloat(todayEarnings.textContent.split(' ')[0]);
+            
+            if (amount <= 0) {
+                addLog('Nada para enviar - saldo zero.');
+                return;
+            }
+            
+            // Reset today's earnings
+            todayEarnings.textContent = '0.00000000 ' + currentCrypto;
+            
+            // Add transaction to history
+            addTransaction(new Date().toLocaleString(), currentCrypto, amount.toFixed(8), 'Completo');
+            
+            addLog(`Enviado ${amount.toFixed(8)} ${currentCrypto} para Binance.`);
+        }
+        
+        document.getElementById('send-to-binance').addEventListener('click', sendToBinance);
+        
+        function addTransaction(date, crypto, amount, status) {
+            const statusClass = status === 'Completo' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+            
+            const transactionHistory = document.getElementById('transaction-history');
+            if (transactionHistory.firstChild && transactionHistory.firstChild.colSpan === 4) {
+                transactionHistory.innerHTML = '';
+            }
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${date}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${crypto}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${amount}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                        ${status}
+                    </span>
+                </td>
+            `;
+            
+            transactionHistory.prepend(row);
+        }
+        
+        function addLog(message) {
+            const logElement = document.getElementById('mining-log');
+            const logEntry = document.createElement('div');
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logElement.prepend(logEntry);
+            
+            // Limit log entries
+            if (logElement.children.length > 50) {
+                logElement.removeChild(logElement.lastChild);
+            }
+        }
+        
+        function updateAutoSendStatus(enabled) {
+            const statusElement = document.getElementById('auto-send-status');
+            if (enabled) {
+                statusElement.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Ativado';
+                statusElement.classList.remove('bg-gray-700');
+                statusElement.classList.add('bg-green-600');
+            } else {
+                statusElement.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Desativado';
+                statusElement.classList.remove('bg-green-600');
+                statusElement.classList.add('bg-gray-700');
+            }
+        }
+        
+        // Logo upload functionality
+        document.getElementById('logo-upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const logoElements = document.querySelectorAll('#app-logo, #about-logo');
+                logoElements.forEach(logo => {
+                    logo.src = event.target.result;
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        // Initialize UI elements
+        function initUI() {
+            // Range sliders
+            document.getElementById('gpu-usage').addEventListener('input', function() {
+                document.getElementById('gpu-usage-value').textContent = this.value + '%';
+            });
+            
+            document.getElementById('cpu-usage').addEventListener('input', function() {
+                document.getElementById('cpu-usage-value').textContent = this.value + '%';
+            });
+            
+            // Toggle switches
+            document.querySelectorAll('input[type="checkbox"].sr-only').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const dot = this.parentElement.querySelector('.dot');
+                    if (this.checked) {
+                        this.parentElement.classList.add('bg-blue-600');
+                        this.parentElement.classList.remove('bg-gray-600');
+                        dot.classList.add('translate-x-6');
+                    } else {
+                        this.parentElement.classList.remove('bg-blue-600');
+                        this.parentElement.classList.add('bg-gray-600');
+                        dot.classList.remove('translate-x-6');
+                    }
+                });
+                
+                // Initialize toggle switches
+                if (checkbox.checked) {
+                    checkbox.parentElement.classList.add('bg-blue-600');
+                    checkbox.parentElement.classList.remove('bg-gray-600');
+                    checkbox.parentElement.querySelector('.dot').classList.add('translate-x-6');
+                }
+            });
+            
+            // Save settings
+            document.getElementById('save-settings').addEventListener('click', function() {
+                addLog('Configurações salvas com sucesso.');
+                // In a real app, you would save these settings to localStorage
+            });
+        }
+    </script>
+<p style="border-radius: 8px; text-align: center; font-size: 12px; color: #fff; margin-top: 16px;position: fixed; left: 8px; bottom: 8px; z-index: 10; background: rgba(0, 0, 0, 0.8); padding: 4px 8px;">Made with <img src="https://enzostvs-deepsite.hf.space/logo.svg" alt="DeepSite Logo" style="width: 16px; height: 16px; vertical-align: middle;display:inline-block;margin-right:3px;filter:brightness(0) invert(1);"><a href="https://enzostvs-deepsite.hf.space" style="color: #fff;text-decoration: underline;" target="_blank" >DeepSite</a> - 🧬 <a href="https://enzostvs-deepsite.hf.space?remix=TutaInfo/tutaminer" style="color: #fff;text-decoration: underline;" target="_blank" >Remix</a></p></body>
+</html>
